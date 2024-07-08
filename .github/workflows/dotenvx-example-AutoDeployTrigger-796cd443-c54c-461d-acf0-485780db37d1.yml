@@ -49,6 +49,19 @@ jobs:
           context: ./src
           push: true
           tags: mioto.azurecr.io/philgarb/dotenvx-example:${{ github.sha }}
+          # secrets: |
+          #   "WEBSOCKET_ENDPOINT=${{ secrets.WEBSOCKET_ENDPOINT }}"
+          #   "PORT=${{ secrets.PORT }}"
+          #   "CONTACT_EMAIL=${{ secrets.CONTACT_EMAIL }}"
+          #   "JWT_ACCESS_SECRET=${{ secrets.JWT_ACCESS_SECRET }}"
+          #   "JWT_REFRESH_SECRET=${{ secrets.JWT_REFRESH_SECRET }}"
+          #   "DATABASE_URL=${{ secrets.DATABASE_URL }}"
+          #   "SENTRY_DSN=${{ secrets.SENTRY_DSN }}"
+          #   "SENTRY_PROJECT=${{ secrets.SENTRY_PROJECT }}"
+          #   "SENTRY_ORG=${{ secrets.SENTRY_ORG }}"
+          #   "SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}"
+          #   "WITH_EMAIL_SERVICE=${{ secrets.WITH_EMAIL_SERVICE }}"
+          #   "ENGINE_VERSION=${{ secrets.ENGINE_VERSION }}"
 
       - name: Azure Login
         uses: azure/login@v1
