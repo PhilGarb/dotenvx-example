@@ -1,5 +1,4 @@
 var express = require("express");
-var path = require("path");
 var logger = require("morgan");
 
 var router = require("./routes/index");
@@ -19,5 +18,4 @@ app.use(express.json({ type: ["applicaton/json"] }));
 app.use(express.urlencoded({ extended: false }));
 app.use("/", router);
 
-console.log("Container Apps Node Sample");
 module.exports = app;

@@ -1,0 +1,65 @@
+name: Trigger auto deployment for dotenvx-example
+
+# When this action will be executed
+on:
+  # Automatically trigger it when detected changes in repo
+  push:
+    branches:
+      [ master ]
+    # Publish semver tags as releases.
+    tags: ["v*.*.*"]
+    paths:
+    - 'src/**'
+    - '.github/workflows/dotenvx-example-AutoDeployTrigger-796cd443-c54c-461d-acf0-485780db37d1.yml'
+
+  # Allow manual trigger
+  workflow_dispatch:
+
+env:
+  REGISTRY: mioto.azurecr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write #This is required for requesting the OIDC JWT Token
+      contents: read #Required when GH token is used to authenticate with private repo
+
+    steps:
+      - name: Checkout to the branch
+        uses: actions/checkout@v2
+
+      # Login against a Docker registry except on PR
+      # https://github.com/docker/login-action
+      - name: Log into registry ${{ env.REGISTRY }}
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v1
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ secrets.DOTENVXEXAMPLE_REGISTRY_USERNAME }}
+          password: ${{ secrets.DOTENVXEXAMPLE_REGISTRY_PASSWORD }}
+
+      # Build and push Docker image with Buildx (don't push on PR)
+      # https://github.com/docker/build-push-action
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v2
+        id: docker_build
+        with:
+          context: ./src
+          push: true
+          tags: mioto.azurecr.io/philgarb/dotenvx-example:${{ github.sha }}
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.DOTENVXEXAMPLE_AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.DOTENVXEXAMPLE_AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.DOTENVXEXAMPLE_AZURE_SUBSCRIPTION_ID }}
+
+      - name: Deploy new image to Azure Container Apps
+        uses: azure/container-apps-deploy-action@v2
+        with:
+          imageToDeploy: mioto.azurecr.io/philgarb/dotenvx-example:${{ github.sha }}
+          containerAppName: dotenvx-example
+          resourceGroup: it_rg_5546
